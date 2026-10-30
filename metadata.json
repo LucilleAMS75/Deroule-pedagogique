@@ -1,0 +1,5 @@
+{
+  "name": "Concepteur de Déroulé Pédagogique CCE",
+  "description": "Outil interactif pour concevoir des déroulés pédagogiques de formation de 7 heures avec export Excel et impression PDF.",
+  "requestFramePermissions": []
+}

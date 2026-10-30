@@ -1,0 +1,1506 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Rédiger un déroulé pédagogique</title>
+  <meta name="description" content="Outil interactif pour concevoir des déroulés pédagogiques de formation de 7 heures avec export Excel et impression PDF." />
+
+  <!-- Google Font -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet" />
+
+  <!-- SheetJS for pure client-side Excel export (standalone) -->
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+
+  <style>
+    :root {
+      --color-primary: #810464;
+      --color-primary-hover: #6a0352;
+      --color-header-bg: #F9E6F4;
+      --color-header-light: #fdf2f9;
+      --color-bg: #F8F9FA;
+      --color-text: #2D3436;
+      --color-text-muted: #64748b;
+      --color-border: #e2e8f0;
+      --font-sans: 'Fira Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: var(--font-sans);
+      background-color: var(--color-bg);
+      color: var(--color-text);
+      line-height: 1.5;
+      padding: 1.5rem 1rem;
+      min-height: 100vh;
+    }
+
+    @media (min-width: 768px) {
+      body {
+        padding: 2rem;
+      }
+    }
+
+    .app-container {
+      max-width: 1600px;
+      margin: 0 auto;
+      background: #ffffff;
+      border-radius: 1rem;
+      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.08), 0 8px 10px -6px rgba(0, 0, 0, 0.04);
+      padding: 1.5rem;
+    }
+
+    @media (min-width: 768px) {
+      .app-container {
+        padding: 2rem;
+      }
+    }
+
+    /* Main Title */
+    .main-title {
+      font-size: 1.875rem;
+      font-weight: 700;
+      text-align: center;
+      color: #111827;
+      margin-bottom: 2rem;
+    }
+
+    /* Header Section */
+    .header-section {
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+      margin-bottom: 2rem;
+    }
+
+    @media (min-width: 768px) {
+      .header-section {
+        flex-direction: row;
+        align-items: flex-start;
+        justify-content: space-between;
+      }
+    }
+
+    /* Action Buttons (Left) */
+    .header-actions {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+      width: 100%;
+      order: 2;
+    }
+
+    @media (min-width: 768px) {
+      .header-actions {
+        width: auto;
+        order: 1;
+        min-width: 200px;
+      }
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      padding: 0.6rem 1rem;
+      font-size: 0.9375rem;
+      font-weight: 600;
+      border-radius: 0.5rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      text-decoration: none;
+      font-family: inherit;
+    }
+
+    .btn-outline {
+      background: #ffffff;
+      color: var(--color-primary);
+      border: 2px solid var(--color-primary);
+    }
+
+    .btn-outline:hover {
+      background: var(--color-header-bg);
+      transform: translateY(-1px);
+    }
+
+    .btn-primary-outline {
+      background: #ffffff;
+      color: var(--color-primary);
+      border: 2px solid var(--color-primary);
+      border-radius: 0.75rem;
+      padding: 0.55rem 1.5rem;
+      font-weight: 700;
+    }
+
+    .btn-primary-outline:hover {
+      background: var(--color-header-bg);
+      transform: scale(1.02);
+    }
+
+    .btn-primary-outline:active {
+      transform: scale(0.98);
+    }
+
+    .btn-primary-solid {
+      background: var(--color-primary);
+      color: #ffffff;
+      border: none;
+      border-radius: 0.75rem;
+      padding: 0.9rem 2rem;
+      font-size: 1.05rem;
+      font-weight: 700;
+      box-shadow: 0 10px 15px -3px rgba(129, 4, 100, 0.3);
+      cursor: pointer;
+    }
+
+    .btn-primary-solid:hover {
+      background: var(--color-primary-hover);
+      box-shadow: 0 14px 20px -3px rgba(129, 4, 100, 0.4);
+      transform: scale(1.02);
+    }
+
+    .btn-primary-solid:active {
+      transform: scale(0.98);
+    }
+
+    .btn-reset {
+      background: transparent;
+      border: none;
+      color: #ef4444;
+      font-weight: 500;
+      font-size: 0.875rem;
+      padding: 0.5rem 1rem;
+      border-radius: 0.5rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      cursor: pointer;
+      transition: color 0.2s;
+    }
+
+    .btn-reset:hover {
+      color: #b91c1c;
+      background: #fef2f2;
+    }
+
+    /* Accordion Consigne (Right) */
+    .accordion-wrapper {
+      flex: 1;
+      width: 100%;
+      order: 1;
+    }
+
+    @media (min-width: 768px) {
+      .accordion-wrapper {
+        order: 2;
+      }
+    }
+
+    .accordion-card {
+      border: 1px solid rgba(129, 4, 100, 0.2);
+      border-radius: 0.75rem;
+      overflow: hidden;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+      background: #ffffff;
+    }
+
+    .accordion-header {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1rem 1.25rem;
+      background: var(--color-header-bg);
+      color: var(--color-primary);
+      font-weight: 700;
+      font-size: 1.125rem;
+      border: none;
+      cursor: pointer;
+      transition: background 0.2s;
+      text-align: left;
+      font-family: inherit;
+    }
+
+    .accordion-header:hover {
+      background: rgba(129, 4, 100, 0.12);
+    }
+
+    .accordion-title {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .accordion-chevron {
+      transition: transform 0.3s ease;
+    }
+
+    .accordion-chevron.collapsed {
+      transform: rotate(-180deg);
+    }
+
+    .accordion-content {
+      overflow: hidden;
+      transition: max-height 0.35s ease, opacity 0.3s ease;
+      max-height: 1000px;
+      opacity: 1;
+    }
+
+    .accordion-content.collapsed {
+      max-height: 0;
+      opacity: 0;
+    }
+
+    .accordion-body {
+      padding: 1.5rem;
+      border-top: 1px solid rgba(129, 4, 100, 0.1);
+      background: #ffffff;
+    }
+
+    .accordion-intro {
+      font-weight: 500;
+      color: #1f2937;
+      margin-bottom: 1rem;
+    }
+
+    .accordion-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 1.5rem;
+    }
+
+    @media (min-width: 768px) {
+      .accordion-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+
+    .accordion-section-title {
+      color: var(--color-primary);
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+      font-size: 0.95rem;
+    }
+
+    .accordion-list {
+      list-style-type: disc;
+      padding-left: 1.25rem;
+      font-size: 0.875rem;
+      color: #374151;
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+    }
+
+    /* Add Row Button Container (Below Accordion, right-aligned) */
+    .add-row-container {
+      display: flex;
+      justify-content: flex-end;
+      margin-top: 1rem;
+    }
+
+    /* Table Section */
+    .table-responsive {
+      overflow-x: auto;
+      border: 1px solid var(--color-border);
+      border-radius: 0.75rem;
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+      margin-bottom: 2rem;
+      background: #ffffff;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 1400px;
+      table-layout: fixed;
+    }
+
+    thead {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      background: var(--color-header-bg);
+      border-bottom: 2px solid var(--color-border);
+    }
+
+    th {
+      padding: 1rem 0.875rem;
+      text-align: left;
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: #374151;
+      position: relative;
+      vertical-align: middle;
+    }
+
+    .th-content {
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+      line-height: 1.25;
+    }
+
+    .th-title {
+      white-space: normal;
+      word-wrap: break-word;
+    }
+
+    .info-badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 16px;
+      height: 16px;
+      border-radius: 9999px;
+      background: var(--color-primary);
+      color: #ffffff;
+      flex-shrink: 0;
+      cursor: help;
+      outline: none;
+    }
+
+    .info-badge:focus-visible {
+      ring: 2px solid var(--color-primary);
+    }
+
+    /* Tooltip */
+    .tooltip-container {
+      position: relative;
+      display: inline-flex;
+    }
+
+    .tooltip-box {
+      visibility: hidden;
+      opacity: 0;
+      position: absolute;
+      top: calc(100% + 8px);
+      left: 50%;
+      transform: translateX(-50%);
+      width: 260px;
+      padding: 0.75rem 0.875rem;
+      background: #1f2937;
+      color: #ffffff;
+      font-size: 0.75rem;
+      font-weight: 400;
+      text-transform: none;
+      letter-spacing: normal;
+      border-radius: 0.5rem;
+      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
+      border: 1px solid #374151;
+      z-index: 60;
+      pointer-events: none;
+      transition: opacity 0.2s, visibility 0.2s;
+      line-height: 1.4;
+    }
+
+    .tooltip-box::before {
+      content: '';
+      position: absolute;
+      bottom: 100%;
+      left: 50%;
+      transform: translateX(-50%);
+      border-width: 6px;
+      border-style: solid;
+      border-color: transparent transparent #1f2937 transparent;
+    }
+
+    th:hover .tooltip-box,
+    .tooltip-container:focus-within .tooltip-box {
+      visibility: visible;
+      opacity: 1;
+    }
+
+    td {
+      padding: 0.75rem;
+      border-bottom: 1px solid #f1f5f9;
+      vertical-align: top;
+      font-size: 0.875rem;
+    }
+
+    /* Example Row */
+    .example-row {
+      background: rgba(129, 4, 100, 0.04);
+      font-style: italic;
+      color: #4b5563;
+      font-size: 0.8125rem;
+    }
+
+    .example-row td {
+      border-bottom: 1px solid #e2e8f0;
+      padding: 0.75rem;
+    }
+
+    .example-badge {
+      font-weight: 700;
+      font-size: 0.75rem;
+      color: var(--color-primary);
+      text-align: center;
+      font-style: normal;
+    }
+
+    /* Data Rows */
+    .data-row {
+      transition: background 0.15s ease;
+    }
+
+    .data-row:hover {
+      background: #fafafa;
+    }
+
+    .form-textarea {
+      width: 100%;
+      padding: 0.5rem;
+      border: 1px solid #cbd5e1;
+      border-radius: 0.25rem;
+      font-family: inherit;
+      font-size: 0.875rem;
+      min-height: 60px;
+      resize: vertical;
+      color: var(--color-text);
+      outline: none;
+      transition: border-color 0.15s, box-shadow 0.15s;
+    }
+
+    .form-textarea:focus {
+      border-color: var(--color-primary);
+      box-shadow: 0 0 0 2px rgba(129, 4, 100, 0.2);
+    }
+
+    .form-input-number {
+      width: 100%;
+      padding: 0.5rem;
+      border: 1px solid #cbd5e1;
+      border-radius: 0.25rem;
+      font-family: inherit;
+      font-size: 0.875rem;
+      color: var(--color-text);
+      outline: none;
+      transition: border-color 0.15s, box-shadow 0.15s;
+    }
+
+    .form-input-number:focus {
+      border-color: var(--color-primary);
+      box-shadow: 0 0 0 2px rgba(129, 4, 100, 0.2);
+    }
+
+    .form-select {
+      width: 100%;
+      padding: 0.5rem;
+      border: 1px solid #cbd5e1;
+      border-radius: 0.25rem;
+      font-family: inherit;
+      font-size: 0.875rem;
+      background-color: #ffffff;
+      color: var(--color-text);
+      outline: none;
+      transition: border-color 0.15s, box-shadow 0.15s;
+    }
+
+    .form-select:focus {
+      border-color: var(--color-primary);
+      box-shadow: 0 0 0 2px rgba(129, 4, 100, 0.2);
+    }
+
+    .form-input-text {
+      width: 100%;
+      margin-top: 0.5rem;
+      padding: 0.4rem 0.5rem;
+      border: 1px solid #cbd5e1;
+      border-radius: 0.25rem;
+      font-family: inherit;
+      font-size: 0.75rem;
+      outline: none;
+    }
+
+    .form-input-text:focus {
+      border-color: var(--color-primary);
+      box-shadow: 0 0 0 2px rgba(129, 4, 100, 0.2);
+    }
+
+    .btn-delete-row {
+      background: transparent;
+      border: none;
+      color: #ef4444;
+      padding: 0.4rem;
+      border-radius: 0.375rem;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0.3;
+    }
+
+    .data-row:hover .btn-delete-row,
+    .btn-delete-row:focus-visible {
+      opacity: 1;
+    }
+
+    .btn-delete-row:hover {
+      background: #fef2f2;
+      color: #dc2626;
+      opacity: 1;
+    }
+
+    /* Counter Section */
+    .counter-banner {
+      margin-bottom: 2rem;
+      padding: 0.75rem 1rem;
+      border-radius: 0.75rem;
+      text-align: center;
+      font-size: 1rem;
+      font-weight: 700;
+      transition: all 0.3s ease;
+      box-shadow: inset 0 2px 4px 0 rgba(0, 0, 0, 0.05);
+      border: 2px solid;
+    }
+
+    .counter-valid {
+      background-color: #dcfce7;
+      color: #15803d;
+      border-color: #22c55e;
+    }
+
+    .counter-invalid {
+      background-color: #fef3c7;
+      color: #b45309;
+      border-color: #f59e0b;
+    }
+
+    /* Footer Actions */
+    .footer-actions {
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+
+    @media (min-width: 768px) {
+      .footer-actions {
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: flex-end;
+      }
+    }
+
+    .footer-left {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      width: 100%;
+    }
+
+    @media (min-width: 768px) {
+      .footer-left {
+        width: auto;
+      }
+    }
+
+    /* Print Styles */
+    @media print {
+      .no-print {
+        display: none !important;
+      }
+
+      body {
+        background: #ffffff !important;
+        padding: 0 !important;
+        color: #000000 !important;
+      }
+
+      .app-container {
+        box-shadow: none !important;
+        padding: 0 !important;
+        max-width: 100% !important;
+        border-radius: 0 !important;
+      }
+
+      .table-responsive {
+        border: none !important;
+        box-shadow: none !important;
+        overflow: visible !important;
+      }
+
+      table {
+        min-width: 100% !important;
+        border: 1px solid #000 !important;
+      }
+
+      th, td {
+        border: 1px solid #000 !important;
+        font-size: 9.5px !important;
+        color: #000 !important;
+        padding: 4px !important;
+      }
+
+      .form-textarea,
+      .form-input-number,
+      .form-select,
+      .form-input-text {
+        border: none !important;
+        height: auto !important;
+        padding: 0 !important;
+        font-size: 9.5px !important;
+        background: transparent !important;
+        box-shadow: none !important;
+        resize: none !important;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app-container">
+    <!-- Main Title -->
+    <h1 class="main-title no-print">Rédiger un déroulé pédagogique</h1>
+
+    <!-- Header Section -->
+    <header class="header-section no-print">
+      <!-- Left Action Buttons -->
+      <div class="header-actions">
+        <!-- Fullscreen Button -->
+        <button id="btnFullscreen" class="btn btn-outline" type="button" aria-label="Basculer en plein écran">
+          <svg id="fullscreenIcon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"></path>
+          </svg>
+          <span id="fullscreenText">Plein écran</span>
+        </button>
+
+        <!-- Template Excel Button -->
+        <button id="btnExportTpl" class="btn btn-outline" type="button">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+            <polyline points="14 2 14 8 20 8"></polyline>
+            <line x1="12" y1="18" x2="12" y2="12"></line>
+            <line x1="9" y1="15" x2="15" y2="15"></line>
+          </svg>
+          Template Excel
+        </button>
+
+        <!-- Print / PDF Button -->
+        <button id="btnPrint" class="btn btn-outline" type="button">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="6 9 6 2 18 2 18 9"></polyline>
+            <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path>
+            <rect x="6" y="14" width="12" height="8"></rect>
+          </svg>
+          Imprimer / PDF
+        </button>
+      </div>
+
+      <!-- Right Accordion Consigne -->
+      <div class="accordion-wrapper">
+        <div class="accordion-card">
+          <button id="accordionToggle" class="accordion-header" type="button" aria-expanded="true" aria-controls="accordionBody">
+            <div class="accordion-title">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10"></circle>
+                <line x1="12" y1="16" x2="12" y2="12"></line>
+                <line x1="12" y1="8" x2="12.01" y2="8"></line>
+              </svg>
+              Consigne
+            </div>
+            <svg id="accordionChevron" class="accordion-chevron" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="18 15 12 9 6 15"></polyline>
+            </svg>
+          </button>
+
+          <div id="accordionBody" class="accordion-content">
+            <div class="accordion-body">
+              <p class="accordion-intro">
+                Concevez le déroulé pédagogique d'une journée de formation de 7 heures sur une thématique de votre choix ou à partir du cas Résid'Azur.
+              </p>
+              <div class="accordion-grid">
+                <div>
+                  <h3 class="accordion-section-title">Votre déroulé doit inclure :</h3>
+                  <ul class="accordion-list">
+                    <li>Un accueil des participants</li>
+                    <li>Un brise-glace</li>
+                    <li>Une évaluation des acquis</li>
+                    <li>Une évaluation à chaud en fin de journée</li>
+                  </ul>
+                </div>
+                <div>
+                  <h3 class="accordion-section-title">Conseils :</h3>
+                  <ul class="accordion-list">
+                    <li>Complétez toutes les colonnes (indiquez NA si non applicable)</li>
+                    <li>Surveillez le compteur pour atteindre 420 minutes</li>
+                    <li>Survolez les en-têtes pour afficher les infobulles d'aide</li>
+                    <li>Une ligne d'exemple est fournie à titre de référence.</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Add Row Button Under Accordion (Right Aligned) -->
+        <div class="add-row-container no-print">
+          <button id="btnAddRow" class="btn btn-primary-outline" type="button">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="12" y1="5" x2="12" y2="19"></line>
+              <line x1="5" y1="12" x2="19" y2="12"></line>
+            </svg>
+            Ajouter une ligne
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <!-- Table Section -->
+    <div class="table-responsive">
+      <table>
+        <thead>
+          <tr>
+            <!-- 1. Compétence visée (11%) -->
+            <th style="width: 11%;">
+              <div class="th-content">
+                <span class="th-title">Compétence visée</span>
+                <div class="tooltip-container">
+                  <span class="info-badge" tabindex="0" role="tooltip" aria-label="Aide sur Compétence visée">
+                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                      <line x1="12" y1="16" x2="12" y2="12"></line>
+                      <line x1="12" y1="8" x2="12.01" y2="8"></line>
+                    </svg>
+                  </span>
+                  <div class="tooltip-box">
+                    Indiquez la compétence professionnelle que cette séquence contribue à développer, en lien avec le référentiel de formation ou les attendus métier.
+                  </div>
+                </div>
+              </div>
+            </th>
+
+            <!-- 2. Objectif pédagogique (11%) -->
+            <th style="width: 11%;">
+              <div class="th-content">
+                <span class="th-title">Objectif pédagogique</span>
+                <div class="tooltip-container">
+                  <span class="info-badge" tabindex="0" role="tooltip" aria-label="Aide sur Objectif pédagogique">
+                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                      <line x1="12" y1="16" x2="12" y2="12"></line>
+                      <line x1="12" y1="8" x2="12.01" y2="8"></line>
+                    </svg>
+                  </span>
+                  <div class="tooltip-box">
+                    Formulez l'objectif avec un verbe d'action observable à l'aide de la taxonomie de Bloom (ex : identifier, appliquer, analyser). Précisez ce que l'apprenant sera capable de faire à l'issue de la séquence.
+                  </div>
+                </div>
+              </div>
+            </th>
+
+            <!-- 3. Contenu (11%) -->
+            <th style="width: 11%;">
+              <div class="th-content">
+                <span class="th-title">Contenu</span>
+                <div class="tooltip-container">
+                  <span class="info-badge" tabindex="0" role="tooltip" aria-label="Aide sur Contenu">
+                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                      <line x1="12" y1="16" x2="12" y2="12"></line>
+                      <line x1="12" y1="8" x2="12.01" y2="8"></line>
+                    </svg>
+                  </span>
+                  <div class="tooltip-box">
+                    Décrivez les notions, concepts ou savoir-faire abordés durant cette séquence.
+                  </div>
+                </div>
+              </div>
+            </th>
+
+            <!-- 4. Thème de la séquence (10%) -->
+            <th style="width: 10%;">
+              <div class="th-content">
+                <span class="th-title">Thème de la séquence</span>
+                <div class="tooltip-container">
+                  <span class="info-badge" tabindex="0" role="tooltip" aria-label="Aide sur Thème de la séquence">
+                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                      <line x1="12" y1="16" x2="12" y2="12"></line>
+                      <line x1="12" y1="8" x2="12.01" y2="8"></line>
+                    </svg>
+                  </span>
+                  <div class="tooltip-box">
+                    Donnez un titre court et explicite à cette séquence (ex : 'Accueil et présentation', 'Mise en situation client difficile').
+                  </div>
+                </div>
+              </div>
+            </th>
+
+            <!-- 5. Durée (80px) -->
+            <th style="width: 80px;">
+              <div class="th-content">
+                <span class="th-title">Durée</span>
+                <div class="tooltip-container">
+                  <span class="info-badge" tabindex="0" role="tooltip" aria-label="Aide sur Durée">
+                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                      <line x1="12" y1="16" x2="12" y2="12"></line>
+                      <line x1="12" y1="8" x2="12.01" y2="8"></line>
+                    </svg>
+                  </span>
+                  <div class="tooltip-box">
+                    Indiquez la durée en minutes. Le total de la journée doit atteindre 420 minutes (7 heures).
+                  </div>
+                </div>
+              </div>
+            </th>
+
+            <!-- 6. Modalité (10%) -->
+            <th style="width: 10%;">
+              <div class="th-content">
+                <span class="th-title">Modalité</span>
+                <div class="tooltip-container">
+                  <span class="info-badge" tabindex="0" role="tooltip" aria-label="Aide sur Modalité">
+                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                      <line x1="12" y1="16" x2="12" y2="12"></line>
+                      <line x1="12" y1="8" x2="12.01" y2="8"></line>
+                    </svg>
+                  </span>
+                  <div class="tooltip-box">
+                    Sélectionnez le format de la séquence : présentiel, distanciel, hybride, etc.
+                  </div>
+                </div>
+              </div>
+            </th>
+
+            <!-- 7. Méthode pédagogique (10%) -->
+            <th style="width: 10%;">
+              <div class="th-content">
+                <span class="th-title">Méthode pédagogique</span>
+                <div class="tooltip-container">
+                  <span class="info-badge" tabindex="0" role="tooltip" aria-label="Aide sur Méthode pédagogique">
+                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                      <line x1="12" y1="16" x2="12" y2="12"></line>
+                      <line x1="12" y1="8" x2="12.01" y2="8"></line>
+                    </svg>
+                  </span>
+                  <div class="tooltip-box">
+                    Choisissez la méthode dominante : expositive (transmission), démonstrative (montrer), interrogative (questionnement), active (mise en action), expérientielle (apprentissage par l'expérience).
+                  </div>
+                </div>
+              </div>
+            </th>
+
+            <!-- 8. Activité pédagogique (11%) -->
+            <th style="width: 11%;">
+              <div class="th-content">
+                <span class="th-title">Activité pédagogique</span>
+                <div class="tooltip-container">
+                  <span class="info-badge" tabindex="0" role="tooltip" aria-label="Aide sur Activité pédagogique">
+                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                      <line x1="12" y1="16" x2="12" y2="12"></line>
+                      <line x1="12" y1="8" x2="12.01" y2="8"></line>
+                    </svg>
+                  </span>
+                  <div class="tooltip-box">
+                    Décrivez concrètement ce que font les apprenants et le formateur (ex : brainstorming, étude de cas, jeu de rôle, quiz).
+                  </div>
+                </div>
+              </div>
+            </th>
+
+            <!-- 9. Outil (10%) -->
+            <th style="width: 10%;">
+              <div class="th-content">
+                <span class="th-title">Outil</span>
+                <div class="tooltip-container">
+                  <span class="info-badge" tabindex="0" role="tooltip" aria-label="Aide sur Outil">
+                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                      <line x1="12" y1="16" x2="12" y2="12"></line>
+                      <line x1="12" y1="8" x2="12.01" y2="8"></line>
+                    </svg>
+                  </span>
+                  <div class="tooltip-box">
+                    Listez les supports et outils utilisés (ex : diaporama, vidéo, paperboard, application numérique). Indiquez NA si non applicable.
+                  </div>
+                </div>
+              </div>
+            </th>
+
+            <!-- 10. Évaluation (10%) -->
+            <th style="width: 10%;">
+              <div class="th-content">
+                <span class="th-title">Évaluation</span>
+                <div class="tooltip-container">
+                  <span class="info-badge" tabindex="0" role="tooltip" aria-label="Aide sur Évaluation">
+                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                      <line x1="12" y1="16" x2="12" y2="12"></line>
+                      <line x1="12" y1="8" x2="12.01" y2="8"></line>
+                    </svg>
+                  </span>
+                  <div class="tooltip-box">
+                    Précisez comment vous vérifiez l'atteinte de l'objectif (ex : QCM, observation, auto-évaluation). Indiquez NA si non applicable.
+                  </div>
+                </div>
+              </div>
+            </th>
+
+            <!-- Actions Header -->
+            <th style="width: 50px;" class="no-print"></th>
+          </tr>
+        </thead>
+        <tbody id="tableBody">
+          <!-- Example Row -->
+          <tr class="example-row">
+            <td>Mobiliser la communication non violente en situation conflictuelle</td>
+            <td>Appliquer les méthodes de la communication non violente lors d'une mise en situation</td>
+            <td>Les 4 étapes de la communication non violente (OSBD : Observation, Sentiment, Besoin, Demande)</td>
+            <td>Jeu de rôle – Client mécontent</td>
+            <td>45</td>
+            <td>Présentiel</td>
+            <td>Expérientielle</td>
+            <td>Jeu de rôle en binôme avec débriefing collectif</td>
+            <td>Fiches scénarios, grille d'observation</td>
+            <td>Auto-évaluation guidée</td>
+            <td class="no-print example-badge">Ex.</td>
+          </tr>
+          <!-- Dynamic user rows will be injected here -->
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Duration Counter Section -->
+    <div id="counterBanner" class="counter-banner counter-invalid">
+      Total : <span id="totalMinutesVal">0</span> min / 420 min (7h)
+    </div>
+
+    <!-- Footer Actions -->
+    <footer class="footer-actions no-print">
+      <div class="footer-left">
+        <button id="btnReset" class="btn-reset" type="button">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="1 4 1 10 7 10"></polyline>
+            <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path>
+          </svg>
+          Réinitialiser tout
+        </button>
+      </div>
+
+      <button id="btnExportVal" class="btn-primary-solid" type="button">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+          <polyline points="7 10 12 15 17 10"></polyline>
+          <line x1="12" y1="15" x2="12" y2="3"></line>
+        </svg>
+        Valider et Télécharger (.xlsx)
+      </button>
+    </footer>
+  </div>
+
+  <script>
+    (function () {
+      'use strict';
+
+      // Constants
+      const STORAGE_KEY = 'cce_formateur_lms_save';
+      const TARGET_MINUTES = 420;
+      const PARCOURS_URL = 'https://1001parcours.cci.fr/experience/mod/page/view.php?id=2092';
+
+      const MODALITIES = [
+        "Présentiel",
+        "Présentiel enrichi",
+        "Distanciel synchrone",
+        "Distanciel asynchrone",
+        "Hybride"
+      ];
+
+      const METHODS = [
+        "Expositive",
+        "Démonstrative",
+        "Interrogative",
+        "Active",
+        "Expérientielle",
+        "Autre"
+      ];
+
+      const INITIAL_EXAMPLE = {
+        competence: "Mobiliser la communication non violente en situation conflictuelle",
+        objectif: "Appliquer les méthodes de la communication non violente lors d'une mise en situation",
+        contenu: "Les 4 étapes de la communication non violente (OSBD : Observation, Sentiment, Besoin, Demande)",
+        theme: "Jeu de rôle – Client mécontent",
+        duree: 45,
+        modalite: "Présentiel",
+        methode: "Expérientielle",
+        methodeAutre: "",
+        activite: "Jeu de rôle en binôme avec débriefing collectif",
+        outil: "Fiches scénarios, grille d'observation",
+        evaluation: "Auto-évaluation guidée"
+      };
+
+      // State
+      let sequences = [];
+
+      // Helpers
+      function createNewSequence() {
+        return {
+          id: Math.random().toString(36).substr(2, 9),
+          competence: "",
+          objectif: "",
+          contenu: "",
+          theme: "",
+          duree: 0,
+          modalite: MODALITIES[0],
+          methode: METHODS[0],
+          methodeAutre: "",
+          activite: "",
+          outil: "",
+          evaluation: ""
+        };
+      }
+
+      function loadData() {
+        try {
+          const saved = localStorage.getItem(STORAGE_KEY);
+          if (saved) {
+            const parsed = JSON.parse(saved);
+            if (Array.isArray(parsed) && parsed.length > 0) {
+              sequences = parsed;
+              return;
+            }
+          }
+        } catch (e) {
+          console.error("Erreur lors de la lecture des données sauvegardées :", e);
+        }
+        // Par défaut, 5 lignes vides
+        sequences = Array.from({ length: 5 }, () => createNewSequence());
+      }
+
+      function saveData() {
+        try {
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(sequences));
+        } catch (e) {
+          console.error("Erreur lors de l'enregistrement :", e);
+        }
+        updateCounter();
+      }
+
+      function calculateTotalMinutes() {
+        return sequences.reduce((sum, s) => sum + (parseInt(s.duree, 10) || 0), 0);
+      }
+
+      function updateCounter() {
+        const total = calculateTotalMinutes();
+        const totalEl = document.getElementById('totalMinutesVal');
+        const bannerEl = document.getElementById('counterBanner');
+
+        if (totalEl) totalEl.textContent = total;
+        if (bannerEl) {
+          if (total === TARGET_MINUTES) {
+            bannerEl.className = 'counter-banner counter-valid';
+          } else {
+            bannerEl.className = 'counter-banner counter-invalid';
+          }
+        }
+      }
+
+      // DOM Rendering
+      const tableBody = document.getElementById('tableBody');
+
+      function renderRows() {
+        // Supprime uniquement les lignes dynamiques (conserve la ligne d'exemple qui est la 1ère)
+        const rows = tableBody.querySelectorAll('.data-row');
+        rows.forEach(r => r.remove());
+
+        sequences.forEach((seq) => {
+          const tr = document.createElement('tr');
+          tr.className = 'data-row';
+          tr.dataset.id = seq.id;
+
+          // 1. Compétence
+          const tdComp = document.createElement('td');
+          const taComp = document.createElement('textarea');
+          taComp.className = 'form-textarea';
+          taComp.value = seq.competence || '';
+          taComp.placeholder = 'Compétence visée...';
+          taComp.addEventListener('input', (e) => {
+            seq.competence = e.target.value;
+            saveData();
+          });
+          tdComp.appendChild(taComp);
+          tr.appendChild(tdComp);
+
+          // 2. Objectif
+          const tdObj = document.createElement('td');
+          const taObj = document.createElement('textarea');
+          taObj.className = 'form-textarea';
+          taObj.value = seq.objectif || '';
+          taObj.placeholder = 'Objectif pédagogique...';
+          taObj.addEventListener('input', (e) => {
+            seq.objectif = e.target.value;
+            saveData();
+          });
+          tdObj.appendChild(taObj);
+          tr.appendChild(tdObj);
+
+          // 3. Contenu
+          const tdCont = document.createElement('td');
+          const taCont = document.createElement('textarea');
+          taCont.className = 'form-textarea';
+          taCont.value = seq.contenu || '';
+          taCont.placeholder = 'Contenu...';
+          taCont.addEventListener('input', (e) => {
+            seq.contenu = e.target.value;
+            saveData();
+          });
+          tdCont.appendChild(taCont);
+          tr.appendChild(tdCont);
+
+          // 4. Thème
+          const tdTheme = document.createElement('td');
+          const taTheme = document.createElement('textarea');
+          taTheme.className = 'form-textarea';
+          taTheme.value = seq.theme || '';
+          taTheme.placeholder = 'Thème...';
+          taTheme.addEventListener('input', (e) => {
+            seq.theme = e.target.value;
+            saveData();
+          });
+          tdTheme.appendChild(taTheme);
+          tr.appendChild(tdTheme);
+
+          // 5. Durée
+          const tdDur = document.createElement('td');
+          const inpDur = document.createElement('input');
+          inpDur.type = 'number';
+          inpDur.min = '0';
+          inpDur.className = 'form-input-number';
+          inpDur.value = seq.duree || 0;
+          inpDur.addEventListener('input', (e) => {
+            seq.duree = parseInt(e.target.value, 10) || 0;
+            saveData();
+          });
+          tdDur.appendChild(inpDur);
+          tr.appendChild(tdDur);
+
+          // 6. Modalité
+          const tdMod = document.createElement('td');
+          const selMod = document.createElement('select');
+          selMod.className = 'form-select';
+          MODALITIES.forEach(opt => {
+            const optEl = document.createElement('option');
+            optEl.value = opt;
+            optEl.textContent = opt;
+            if (seq.modalite === opt) optEl.selected = true;
+            selMod.appendChild(optEl);
+          });
+          selMod.addEventListener('change', (e) => {
+            seq.modalite = e.target.value;
+            saveData();
+          });
+          tdMod.appendChild(selMod);
+          tr.appendChild(tdMod);
+
+          // 7. Méthode
+          const tdMeth = document.createElement('td');
+          const selMeth = document.createElement('select');
+          selMeth.className = 'form-select';
+          METHODS.forEach(opt => {
+            const optEl = document.createElement('option');
+            optEl.value = opt;
+            optEl.textContent = opt;
+            if (seq.methode === opt) optEl.selected = true;
+            selMeth.appendChild(optEl);
+          });
+
+          const inpMethAutre = document.createElement('input');
+          inpMethAutre.type = 'text';
+          inpMethAutre.className = 'form-input-text';
+          inpMethAutre.placeholder = 'Précisez...';
+          inpMethAutre.value = seq.methodeAutre || '';
+          inpMethAutre.style.display = seq.methode === 'Autre' ? 'block' : 'none';
+
+          selMeth.addEventListener('change', (e) => {
+            seq.methode = e.target.value;
+            inpMethAutre.style.display = seq.methode === 'Autre' ? 'block' : 'none';
+            saveData();
+          });
+
+          inpMethAutre.addEventListener('input', (e) => {
+            seq.methodeAutre = e.target.value;
+            saveData();
+          });
+
+          tdMeth.appendChild(selMeth);
+          tdMeth.appendChild(inpMethAutre);
+          tr.appendChild(tdMeth);
+
+          // 8. Activité
+          const tdAct = document.createElement('td');
+          const taAct = document.createElement('textarea');
+          taAct.className = 'form-textarea';
+          taAct.value = seq.activite || '';
+          taAct.placeholder = 'Activité pédagogique...';
+          taAct.addEventListener('input', (e) => {
+            seq.activite = e.target.value;
+            saveData();
+          });
+          tdAct.appendChild(taAct);
+          tr.appendChild(tdAct);
+
+          // 9. Outil
+          const tdOutil = document.createElement('td');
+          const taOutil = document.createElement('textarea');
+          taOutil.className = 'form-textarea';
+          taOutil.value = seq.outil || '';
+          taOutil.placeholder = 'Outil (ou NA)...';
+          taOutil.addEventListener('input', (e) => {
+            seq.outil = e.target.value;
+            saveData();
+          });
+          tdOutil.appendChild(taOutil);
+          tr.appendChild(tdOutil);
+
+          // 10. Évaluation
+          const tdEval = document.createElement('td');
+          const taEval = document.createElement('textarea');
+          taEval.className = 'form-textarea';
+          taEval.value = seq.evaluation || '';
+          taEval.placeholder = 'Évaluation (ou NA)...';
+          taEval.addEventListener('input', (e) => {
+            seq.evaluation = e.target.value;
+            saveData();
+          });
+          tdEval.appendChild(taEval);
+          tr.appendChild(tdEval);
+
+          // 11. Actions (Delete button)
+          const tdAction = document.createElement('td');
+          tdAction.className = 'no-print';
+          tdAction.style.verticalAlign = 'middle';
+          tdAction.style.textAlign = 'center';
+
+          const btnDel = document.createElement('button');
+          btnDel.className = 'btn-delete-row';
+          btnDel.type = 'button';
+          btnDel.title = 'Supprimer cette ligne';
+          btnDel.setAttribute('aria-label', 'Supprimer cette ligne');
+          btnDel.innerHTML = `
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="3 6 5 6 21 6"></polyline>
+              <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+              <line x1="10" y1="11" x2="10" y2="17"></line>
+              <line x1="14" y1="11" x2="14" y2="17"></line>
+            </svg>
+          `;
+          btnDel.addEventListener('click', () => {
+            sequences = sequences.filter(s => s.id !== seq.id);
+            saveData();
+            renderRows();
+          });
+
+          tdAction.appendChild(btnDel);
+          tr.appendChild(tdAction);
+
+          tableBody.appendChild(tr);
+        });
+
+        updateCounter();
+      }
+
+      // Add Row Button
+      document.getElementById('btnAddRow').addEventListener('click', () => {
+        sequences.push(createNewSequence());
+        saveData();
+        renderRows();
+
+        // Scroll to the new row smoothly
+        const allRows = tableBody.querySelectorAll('.data-row');
+        if (allRows.length > 0) {
+          const last = allRows[allRows.length - 1];
+          last.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+          const firstInput = last.querySelector('textarea, input');
+          if (firstInput) firstInput.focus();
+        }
+      });
+
+      // Reset Button
+      document.getElementById('btnReset').addEventListener('click', () => {
+        if (confirm("Effacer tout votre travail ?")) {
+          sequences = Array.from({ length: 5 }, () => createNewSequence());
+          saveData();
+          renderRows();
+        }
+      });
+
+      // Print Button
+      document.getElementById('btnPrint').addEventListener('click', () => {
+        window.print();
+      });
+
+      // Accordion Toggle
+      const accordionToggle = document.getElementById('accordionToggle');
+      const accordionBody = document.getElementById('accordionBody');
+      const accordionChevron = document.getElementById('accordionChevron');
+      let isAccordionOpen = true;
+
+      accordionToggle.addEventListener('click', () => {
+        isAccordionOpen = !isAccordionOpen;
+        accordionToggle.setAttribute('aria-expanded', isAccordionOpen ? 'true' : 'false');
+        if (isAccordionOpen) {
+          accordionBody.classList.remove('collapsed');
+          accordionChevron.classList.remove('collapsed');
+        } else {
+          accordionBody.classList.add('collapsed');
+          accordionChevron.classList.add('collapsed');
+        }
+      });
+
+      // Fullscreen Toggle
+      const btnFullscreen = document.getElementById('btnFullscreen');
+      const fullscreenText = document.getElementById('fullscreenText');
+      const fullscreenIcon = document.getElementById('fullscreenIcon');
+
+      function updateFullscreenUI() {
+        const isFullscreen = !!(document.fullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement);
+        if (fullscreenText) {
+          fullscreenText.textContent = isFullscreen ? "Quitter plein écran" : "Plein écran";
+        }
+        if (fullscreenIcon) {
+          fullscreenIcon.innerHTML = isFullscreen
+            ? '<path d="M8 3v3a2 2 0 0 1-2 2H3m18 0h-3a2 2 0 0 1-2-2V3m0 18v-3a2 2 0 0 1 2-2h3M3 16h3a2 2 0 0 1 2 2v3"></path>'
+            : '<path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"></path>';
+        }
+      }
+
+      function toggleFullscreen() {
+        if (!document.fullscreenElement && !document.webkitFullscreenElement) {
+          const docEl = document.documentElement;
+          if (docEl.requestFullscreen) {
+            docEl.requestFullscreen().catch(err => console.warn('Plein écran non disponible :', err));
+          } else if (docEl.webkitRequestFullscreen) {
+            docEl.webkitRequestFullscreen();
+          }
+        } else {
+          if (document.exitFullscreen) {
+            document.exitFullscreen().catch(err => console.warn('Sortie plein écran impossible :', err));
+          } else if (document.webkitExitFullscreen) {
+            document.webkitExitFullscreen();
+          }
+        }
+      }
+
+      btnFullscreen.addEventListener('click', toggleFullscreen);
+      document.addEventListener('fullscreenchange', updateFullscreenUI);
+      document.addEventListener('webkitfullscreenchange', updateFullscreenUI);
+
+      // Excel Export Function
+      function exportExcel(isTemplate = false) {
+        const total = calculateTotalMinutes();
+        if (!isTemplate && total !== TARGET_MINUTES) {
+          const proceed = confirm(`Attention : Votre total est de ${total} min. Souhaitez-vous quand même exporter ?`);
+          if (!proceed) return;
+        }
+
+        const headers = [
+          "Compétence",
+          "Objectif",
+          "Contenu",
+          "Thème",
+          "Durée",
+          "Modalité",
+          "Méthode",
+          "Activité",
+          "Outil",
+          "Évaluation"
+        ];
+
+        const rowsData = [headers];
+
+        // Ligne d'exemple
+        rowsData.push([
+          INITIAL_EXAMPLE.competence,
+          INITIAL_EXAMPLE.objectif,
+          INITIAL_EXAMPLE.contenu,
+          INITIAL_EXAMPLE.theme,
+          INITIAL_EXAMPLE.duree,
+          INITIAL_EXAMPLE.modalite,
+          INITIAL_EXAMPLE.methode,
+          INITIAL_EXAMPLE.activite,
+          INITIAL_EXAMPLE.outil,
+          INITIAL_EXAMPLE.evaluation
+        ]);
+
+        if (!isTemplate) {
+          sequences.forEach(s => {
+            const meth = s.methode === 'Autre' && s.methodeAutre ? s.methodeAutre : s.methode;
+            rowsData.push([
+              s.competence || '',
+              s.objectif || '',
+              s.contenu || '',
+              s.theme || '',
+              s.duree || 0,
+              s.modalite || '',
+              meth || '',
+              s.activite || '',
+              s.outil || '',
+              s.evaluation || ''
+            ]);
+          });
+        }
+
+        const fileName = isTemplate ? "Template_CCE.xlsx" : "Mon_Deroule_Pedagogique.xlsx";
+
+        // Utilisation de SheetJS si disponible
+        if (typeof XLSX !== 'undefined') {
+          try {
+            const ws = XLSX.utils.aoa_to_sheet(rowsData);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "Déroulé");
+            XLSX.writeFile(wb, fileName);
+
+            if (!isTemplate) {
+              setTimeout(() => {
+                window.open(PARCOURS_URL, "_blank");
+              }, 1500);
+            }
+            return;
+          } catch (e) {
+            console.warn("Échec SheetJS, bascule vers CSV :", e);
+          }
+        }
+
+        // Secours autonome en CSV (avec BOM UTF-8 et séparateur point-virgule pour Excel français)
+        try {
+          const csvContent = "\uFEFF" + rowsData.map(row => {
+            return row.map(val => {
+              const str = (val === null || val === undefined) ? '' : String(val);
+              return '"' + str.replace(/"/g, '""') + '"';
+            }).join(';');
+          }).join('\r\n');
+
+          const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+          const link = document.createElement('a');
+          const csvName = fileName.replace('.xlsx', '.csv');
+          link.href = URL.createObjectURL(blob);
+          link.download = csvName;
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+          URL.revokeObjectURL(link.href);
+
+          if (!isTemplate) {
+            setTimeout(() => {
+              window.open(PARCOURS_URL, "_blank");
+            }, 1500);
+          }
+        } catch (err) {
+          alert("Erreur lors de l'exportation du fichier : " + err.message);
+        }
+      }
+
+      document.getElementById('btnExportTpl').addEventListener('click', () => exportExcel(true));
+      document.getElementById('btnExportVal').addEventListener('click', () => exportExcel(false));
+
+      // Initialisation
+      loadData();
+      renderRows();
+    })();
+  </script>
+</body>
+</html>

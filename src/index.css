@@ -1,0 +1,39 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Fira Sans", ui-sans-serif, system-ui, sans-serif;
+  --color-primary: #810464;
+  --color-primary-hover: #6A0352;
+  --color-header-bg: #F9E6F4;
+}
+
+@layer base {
+  body {
+    @apply bg-[#F8F9FA] text-[#2D3436] font-sans;
+  }
+}
+
+@media print {
+  .no-print {
+    display: none !important;
+  }
+  .container {
+    box-shadow: none !important;
+    padding: 0 !important;
+    max-width: 100% !important;
+  }
+  table {
+    min-width: 100% !important;
+    border: 1px solid #000 !important;
+  }
+  th, td {
+    border: 1px solid #000 !important;
+    font-size: 10px !important;
+    color: #000 !important;
+  }
+  textarea, input, select {
+    border: none !important;
+    height: auto !important;
+    appearance: none !important;
+  }
+}
